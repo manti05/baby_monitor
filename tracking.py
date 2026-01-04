@@ -118,39 +118,30 @@ class CameraOps:
             print("Unable to load camera / video stream, please check the source path..")
             return False
 
-    # Input is Face status and Body position
+# Input is Face status and Body position
     def babyDangerWarning(self, face, body):
-        warning_severity = 'LOW'
-        # If the face is detected and body is not covered
+        # Face detected cases
         if face == "Face Detected":
-            # If the body is "On It's Side" position
             if body == "On It's Side":
-                warning_severity = 'MEDIUM'
-                return "Face detected and On It's Side", warning_severity
-            # If the face is detected it can be assumed that the doll is face up
-            # If the body is in "Face up" position return Face up
-            elif body == "Covered" or body == "Face Up":
-                warning_severity = 'LOW'
-                return "Face detected and Face Up", warning_severity
-        # If the face is Covered
-        elif face == "DANGER":
-            # If the body is Face Down
-            if body == "Face Down":
-                warning_severity = 'HIGH'
-                return "WARNING baby in DANGER Face Down", warning_severity
-            # If the body is Covered
-            elif body == "Covered":
-                warning_severity = 'HIGH'
-                return "WARNING baby in DANGER could be Covered", warning_severity
-            # If the body is Face Up Position
-            elif body == "Face Up":
-                warning_severity = 'HIGH'
-                return "DANGER Face Covered body Face Up Position", warning_severity
+                return "Face detected and On It's Side", "MEDIUM"
+            if body in ("Covered", "Face Up"):
+                return "Face detected and Face Up", "LOW"
+            # Face detected but body position is something else / unknown
+            return "Face detected", "LOW"
 
-        # If face and body values are None
-        else:
-            warning_severity = 'HIGH'
-            return "No Baby Found", warning_severity
+        # Face covered / danger cases
+        if face == "DANGER":
+            if body == "Face Down":
+                return "WARNING baby in DANGER Face Down", "HIGH"
+            if body == "Covered":
+                return "WARNING baby in DANGER could be Covered", "HIGH"
+            if body == "Face Up":
+                return "DANGER Face Covered body Face Up Position", "HIGH"
+            # Danger but body unknown
+            return "WARNING baby in DANGER", "HIGH"
+
+        # Default fallback: no baby / unknown state
+        return "No Baby Found", "HIGH"
 
     def start_cam_stream(self):
         print("Started _Camera")
