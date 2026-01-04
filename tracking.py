@@ -146,7 +146,6 @@ class CameraOps:
     def start_cam_stream(self):
         print("Started _Camera")
         self.toStream = True
-        pose = PoseEstimation()
         babyDanger = 0
         babyOK = 0
         # =================================================================================================
@@ -184,7 +183,7 @@ class CameraOps:
             babyPosition = str(self.pose.babyPosition(rgb))
             # Warning message to be displayed on the frame
             msg, sev = self.babyDangerWarning(face, babyPosition)
-            
+
             if face == "DANGER":
                 babyDanger += 1
                 if babyOK < babyDanger and babyDanger > 3:
