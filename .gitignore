@@ -1,0 +1,25 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+.env
+
+# IDEs
+.idea/
+.vscode/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+DataSets/
+*.log
+*.tmp
+
+# Project assets you usually don't commit (optional)
+# outputs/
+# runs/
