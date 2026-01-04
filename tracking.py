@@ -183,20 +183,20 @@ class CameraOps:
             # Tracking baby position
             babyPosition = str(self.pose.babyPosition(rgb))
             # Warning message to be displayed on the frame
-            # The if statement to check if its not None was needed to stop the program from breaking
-            if self.babyDangerWarning(face, babyPosition) is not None:
-                if face == "DANGER":
-                    babyDanger = babyDanger + 1
-                    if babyOK < babyDanger:
-                        if babyDanger > 3:
-                            self.warning_message, self.warning_severity = self.babyDangerWarning(face, babyPosition)
-                            babyDanger = 0
-                elif face == "Face Detected":
-                    babyOK = babyOK + 1
-                    if babyOK > babyDanger:
-                        if babyOK > 3:
-                            self.warning_message, self.warning_severity = self.babyDangerWarning(face, babyPosition)
-                            babyOK = 0
+            msg, sev = self.babyDangerWarning(face, babyPosition)
+            
+            if face == "DANGER":
+                babyDanger += 1
+                if babyOK < babyDanger and babyDanger > 3:
+                    self.warning_message, self.warning_severity = msg, sev
+                    babyDanger = 0
+
+            elif face == "Face Detected":
+                babyOK += 1
+                if babyOK > babyDanger and babyOK > 3:
+                    self.warning_message, self.warning_severity = msg, sev
+                    babyOK = 0
+
 
             print("babyPosition", babyPosition)
             print('face',face)
