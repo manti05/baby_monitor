@@ -5,6 +5,7 @@ import numpy as np
 from yunet import YuNet
 import time
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +108,7 @@ class CameraOps:
 
         self._yunet = None
         self._yunet_input_size = None  # (w, h)
+        self._yunet_model_path = Path("DataSets") / "face_detection_yunet_2022mar.onnx"
 
         self.load_stream()
     def load_stream(self):
@@ -253,8 +255,11 @@ class CameraOps:
         # Setting number of faces to 1 instead of 5000 (topK)
         # Instantiating YuNet model
         if self._yunet is None:
+            if not self._yunet_model_path.exists():
+                raise FileNotFoundError(f"YuNet model not found: {self._yunet_model_path.resolve()}")
+            
             self._yunet = YuNet(
-                modelPath='DataSets/face_detection_yunet_2022mar.onnx',
+                modelPath=str(self._yunet_model_path),
                 inputSize=[320, 320],
                 confThreshold=0.80,
                 nmsThreshold=0.3,
