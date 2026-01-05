@@ -51,7 +51,7 @@ class PoseEstimation():
                     results.pose_landmarks,
                     self.mp_pose.POSE_CONNECTIONS,
                     landmark_drawing_spec=self.mp_drawing_styles.get_default_pose_landmarks_style())
-        # return trackingImage
+        return image
 
     def babyPosition(self, image):
         baby_position = "Covered"
@@ -147,6 +147,7 @@ class CameraOps:
 
     def start_cam_stream(self):
         logger.info("Started camera stream")
+        show_pose_landmarks = True
         self.toStream = True
         babyDanger = 0
         babyOK = 0
@@ -202,15 +203,28 @@ class CameraOps:
                 "position=%s face=%s msg=%s sev=%s",
                 babyPosition, face, self.warning_message, self.warning_severity
             )
+
             # =================================================================================================
             # Flip the image horizontally for a selfie-view display.
             # image = cv2.flip(image, 1)
-            image = cv2.putText(frame, self.warning_message, (0, 30), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.8, (0, 0, 255), 2, cv2.LINE_AA)
+            display_frame = frame  # YuNet visualization output (BGR)
 
-            self.curFrame = image
-            cv2.imshow('Position', image)
-            # cv2.imshow('Body Track', bodyTrack)
+            if show_pose_landmarks:
+                # Draw landmarks on a COPY of the RGB pose frame
+                pose_vis_rgb = self.pose.drawLandmarks(rgb_for_pose.copy(), draw=True)
+                # Convert pose visualization back to BGR so we can blend with YuNet frame
+                pose_vis_bgr = cv2.cvtColor(pose_vis_rgb, cv2.COLOR_RGB2BGR)
+
+                # Blend pose landmarks over YuNet frame
+                display_frame = cv2.addWeighted(display_frame, 0.7, pose_vis_bgr, 0.3, 0)
+
+            display_frame = cv2.putText(
+                display_frame, self.warning_message, (0, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2, cv2.LINE_AA
+            )
+
+            self.curFrame = display_frame
+            cv2.imshow('Position', display_frame)
 
             # Wait for 'q' key to stop the program
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -305,5 +319,3 @@ class CameraOps:
             message = "Having trouble detecting the face"
         return message, frame
     # ====================================================================================================
-
-
