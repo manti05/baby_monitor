@@ -149,9 +149,6 @@ class CameraOps:
         babyDanger = 0
         babyOK = 0
         # =================================================================================================
-        wYuNet = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        hYuNet = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        # =================================================================================================
         while self.toStream:
             # print("Streaming...")
             success, image = self.cap.read()
@@ -180,7 +177,7 @@ class CameraOps:
                 rgb_for_pose = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 
             # YuNet on BGR
-            face, frame = self.faceTrackingYuNet(bgr_for_yunet, wYuNet, hYuNet)
+            face, frame = self.faceTrackingYuNet(bgr_for_yunet)
 
             # MediaPipe on RGB
             babyPosition = str(self.pose.babyPosition(rgb_for_pose))
@@ -250,7 +247,8 @@ class CameraOps:
 
         return output
 
-    def faceTrackingYuNet(self, image, w, h):
+    def faceTrackingYuNet(self, image):
+        h, w = image.shape[:2]
         # Setting confidence Threshold of finding a face to 80% (confThreshold)
         # Setting number of faces to 1 instead of 5000 (topK)
         # Instantiating YuNet model
