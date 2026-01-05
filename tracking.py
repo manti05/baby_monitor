@@ -4,7 +4,9 @@ import math
 import numpy as np
 from yunet import YuNet
 import time
+import logging
 
+logger = logging.getLogger(__name__)
 
 class PoseEstimation():
     def __init__(self,
@@ -106,17 +108,15 @@ class CameraOps:
         self._yunet = None
         self._yunet_input_size = None  # (w, h)
 
-
         self.load_stream()
     def load_stream(self):
         self.cap = cv2.VideoCapture(self.camSource)
         ret, frame = self.cap.read()
         if ret:
-            print("Cam/video load successful..")
+            logger.info("Cam/video load successful.")
             return True
-        else:
-            print("Unable to load camera / video stream, please check the source path..")
-            return False
+        logger.error("Unable to load camera/video stream. Check the source path.")
+        return False
 
 # Input is Face status and Body position
     def babyDangerWarning(self, face, body):
@@ -144,7 +144,7 @@ class CameraOps:
         return "No Baby Found", "HIGH"
 
     def start_cam_stream(self):
-        print("Started _Camera")
+        logger.info("Started camera stream")
         self.toStream = True
         babyDanger = 0
         babyOK = 0
@@ -158,7 +158,7 @@ class CameraOps:
             # True for night video, False for day video
             night = False
             if not success:
-                print("No Frames to Track.")
+                logger.warning("No frames to track.")
                 self.toStream=False
                 break
             # =================================================================================================
@@ -196,11 +196,10 @@ class CameraOps:
                     self.warning_message, self.warning_severity = msg, sev
                     babyOK = 0
 
-
-            print("babyPosition", babyPosition)
-            print('face',face)
-            print('self.warning_message',self.warning_message)
-            print('self.warning_severity',self.warning_severity)
+            logger.debug(
+                "position=%s face=%s msg=%s sev=%s",
+                babyPosition, face, self.warning_message, self.warning_severity
+            )
             # =================================================================================================
             # Flip the image horizontally for a selfie-view display.
             # image = cv2.flip(image, 1)
@@ -225,7 +224,6 @@ class CameraOps:
         # Visualize Method from YuNet demo.py
         # https://github.com/opencv/opencv_zoo/blob/master/models/face_detection_yunet/demo.py
         output = image.copy()
-
         landmark_color = [
             (255,   0,   0), # right eye
             (  0,   0, 255), # left eye
@@ -263,8 +261,7 @@ class CameraOps:
                 backendId=3,
                 targetId=0
             )
-            # Optional: helps you confirm it only happens once
-            print("YuNet initialized")
+            logger.info("YuNet initialized")
         # Inference
         # Update input size only if it changed
         if self._yunet_input_size != (w, h):

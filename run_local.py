@@ -1,7 +1,8 @@
-# run_local.py
 import argparse
 from tracking import CameraOps
+import logging
 
+logging.basicConfig(level=logging.INFO)
 
 def parse_source(value: str):
     # Allow: "0" -> webcam, or "demoNight.avi" -> file
