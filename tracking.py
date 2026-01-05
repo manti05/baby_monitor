@@ -168,19 +168,22 @@ class CameraOps:
             # bodyTrack = pose.drawLandmarks(image)
             # pose.drawLandmarks(image)
             # =================================================================================================
-            if night is True:
-                src = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                dst = cv2.equalizeHist(src)
-                # cv2.imshow('Equalized Image', dst)
-                rgb = cv2.cvtColor(dst, cv2.COLOR_GRAY2RGB)
+            # - BGR for OpenCV/YuNet
+            # - RGB for MediaPipe
+            if night:
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                eq = cv2.equalizeHist(gray)
+                bgr_for_yunet = cv2.cvtColor(eq, cv2.COLOR_GRAY2BGR)
+                rgb_for_pose = cv2.cvtColor(eq, cv2.COLOR_GRAY2RGB)
             else:
-                rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            # faceTrackingHaarCascade(image, cascadeFilePath)
-            # =================================================================================================
-            # Tracking face
-            face, frame = self.faceTrackingYuNet(rgb, wYuNet, hYuNet)
-            # Tracking baby position
-            babyPosition = str(self.pose.babyPosition(rgb))
+                bgr_for_yunet = image
+                rgb_for_pose = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                
+            # YuNet on BGR
+            face, frame = self.faceTrackingYuNet(bgr_for_yunet, wYuNet, hYuNet)
+
+            # MediaPipe on RGB
+            babyPosition = str(self.pose.babyPosition(rgb_for_pose))
             # Warning message to be displayed on the frame
             msg, sev = self.babyDangerWarning(face, babyPosition)
 
