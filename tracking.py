@@ -267,19 +267,19 @@ class CameraOps:
         if self._yunet_input_size != (w, h):
             self._yunet.setInputSize([w, h])
             self._yunet_input_size = (w, h)
-        results = self._yunet.infer(image)  # results is a tuple
 
-        for det in (results if results is not None else []):
-            landmarks = det[4:14].astype(np.int32).reshape((5, 2))
-            # If the face is detected face variable is set to faceDetected
-            if det[-1]:
-                face = "faceDetected"
-            # Else the face variable is set to faceCovered
-            else:
-                face = "faceCovered"
+        results = self._yunet.infer(image)
 
-        if results is None:
-            face = "None"
+        # Default for this frame: no face detected
+        face = "None"
+
+        # infer() can return None or an empty array when nothing is detected
+        if results is None or len(results) == 0:
+            results = None
+        else:
+            # If we got a detection, it has a confidence score in the last element
+            conf = float(results[0][-1])
+            face = "faceDetected" if conf >= 0.80 else "faceCovered"
 
         # Draw results on the input image
         frame = self.visualize(image, results)
