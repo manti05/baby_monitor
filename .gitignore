@@ -16,7 +16,7 @@ venv/
 .DS_Store
 Thumbs.db
 
-DataSets/
+otherDataSets/
 *.log
 *.tmp
 
